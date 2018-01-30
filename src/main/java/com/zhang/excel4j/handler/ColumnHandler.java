@@ -2,13 +2,21 @@ package com.zhang.excel4j.handler;
 
 import com.zhang.excel4j.annotation.Column;
 import com.zhang.excel4j.annotation.GroupBy;
+import com.zhang.excel4j.common.FieldAccessType;
 import com.zhang.excel4j.common.GroupType;
+import com.zhang.excel4j.common.WorkbookType;
+import com.zhang.excel4j.converter.Converter;
+import com.zhang.excel4j.converter.DefaultConverter;
 import com.zhang.excel4j.model.ExcelHeader;
 import org.apache.commons.codec.binary.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,13 +30,6 @@ import java.util.regex.Pattern;
  * date : 2018/1/26 11:05
  */
 public class ColumnHandler {
-
-    /**
-     * getter或setter枚举
-     */
-    public enum FieldAccessType {
-        GETTER, SETTER
-    }
 
     /**
      * 根据对象注解获取文件表头列表
@@ -89,6 +90,58 @@ public class ColumnHandler {
         // 排序
         Collections.sort(headers);
         return headers;
+    }
+
+    /**
+     * 根据对象属性获取该属性的getter或setter方法
+     *
+     * @param clazz      操作类的class对象
+     * @param fieldName  对象属性
+     * @param methodType 方法类型（getter或setter枚举）
+     * @return 属性的getter或setter方法
+     * @throws IntrospectionException 异常
+     */
+    public static Method getterOrSetter(Class clazz, String fieldName, FieldAccessType methodType)
+            throws IntrospectionException {
+        if (null == fieldName || "".equals(fieldName)) {
+            return null;
+        }
+        PropertyDescriptor prop = new PropertyDescriptor(fieldName, clazz);
+        switch (methodType) {
+            case GETTER:
+                return prop.getReadMethod();
+            case SETTER:
+                return prop.getWriteMethod();
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * 根据属性名和转换器获取对象中的属性值
+     *
+     * @param object    对象
+     * @param fieldName 属性名
+     * @param converter 转换器
+     * @return 属性值
+     * @throws IntrospectionException    异常
+     * @throws InvocationTargetException 异常
+     * @throws IllegalAccessException    异常
+     */
+    public static String getValueByAttribute(Object object, String fieldName, Converter converter)
+            throws IntrospectionException, InvocationTargetException, IllegalAccessException {
+        if (object == null) {
+            return "";
+        }
+        // getter方法
+        Method method = getterOrSetter(object.getClass(), fieldName, FieldAccessType.GETTER);
+        // 属性值
+        Object fieldValue = method.invoke(object);
+        if (converter != null && converter.getClass() != DefaultConverter.class) {
+            // TODO 数据类型和转换器
+            fieldValue = converter.execWrite(fieldValue);
+        }
+        return fieldValue == null ? "" : fieldValue.toString();
     }
 
     /**
@@ -165,5 +218,17 @@ public class ColumnHandler {
             number = matcher.group(1);
         }
         return number;
+    }
+
+    /**
+     * 通过文件路径获取工作簿类型
+     *
+     * @param filePath 文件路径
+     * @return 工作簿类型
+     */
+    public static WorkbookType getWorkbookTypeByFilePath(String filePath) {
+        // 获取文件后缀
+        String suffix = filePath.substring(filePath.lastIndexOf(".") + 1);
+        return WorkbookType.getWorkbookType(suffix);
     }
 }
