@@ -7,6 +7,7 @@ package com.zhang.excel4j.common;
  * date : 2018/1/31 16:23
  */
 public interface DateFormatPattern {
+
     String DATE_FORMAT_DAY = "yyyy-MM-dd";
     String DATE_FORMAT_DAY_2 = "yyyy/MM/dd";
     String TIME_FORMAT_SEC = "HH:mm:ss";

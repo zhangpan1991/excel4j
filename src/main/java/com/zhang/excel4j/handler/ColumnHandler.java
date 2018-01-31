@@ -224,12 +224,20 @@ public class ColumnHandler {
      * @param cell 单元格类型为公式的单元格
      * @return 返回单元格计算后的值 格式化成String
      */
-    public static String calculationFormula(Cell cell) {
+    private static String calculationFormula(Cell cell) {
         CellValue cellValue = cell.getSheet().getWorkbook().getCreationHelper()
                 .createFormulaEvaluator().evaluate(cell);
         return cellValue.formatAsString();
     }
 
+    /**
+     * 字符串数据转对象数据
+     *
+     * @param strField 字符串
+     * @param clazz    类型
+     * @return 转换后数据
+     * @throws ParseException 异常
+     */
     public static Object str2TargetClass(String strField, Class<?> clazz) throws ParseException {
         if (null == strField || "".equals(strField))
             return null;
@@ -261,6 +269,52 @@ public class ColumnHandler {
             return DateUtil.str2Date(strField);
         }
         return strField;
+    }
+
+    /**
+     * 根据对象的属性名获取属性
+     *
+     * @param clazz     class对象
+     * @param fieldName 属性名
+     * @return class对象的属性
+     */
+    private static Field matchClassField(Class clazz, String fieldName) {
+        List<Field> fields = new ArrayList<>();
+        for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
+            fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
+        }
+        for (Field field : fields) {
+            if (fieldName.equals(field.getName())) {
+                return field;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 根据属性名与属性类型获取字段内容
+     *
+     * @param bean  对象
+     * @param name  字段名
+     * @param value 字段类型
+     * @throws InvocationTargetException 异常
+     * @throws IllegalAccessException    异常
+     * @throws IntrospectionException    异常
+     */
+    public static void copyProperty(Object bean, String name, Object value)
+            throws InvocationTargetException, IllegalAccessException, IntrospectionException, ParseException {
+        if (null == name || null == value)
+            return;
+        Field field = matchClassField(bean.getClass(), name);
+        if (null == field)
+            return;
+        Method method = getterOrSetter(bean.getClass(), name, FieldAccessType.SETTER);
+
+        if (value.getClass() == field.getType()) {
+            method.invoke(bean, value);
+        } else {
+            method.invoke(bean, str2TargetClass(value.toString(), field.getType()));
+        }
     }
 
     /**
