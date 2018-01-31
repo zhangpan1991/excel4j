@@ -3,12 +3,13 @@ package com.zhang.excel4j.handler;
 import com.zhang.excel4j.common.WorkbookType;
 import com.zhang.excel4j.model.ExcelHeader;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * author : zhangpan
@@ -16,8 +17,63 @@ import java.util.List;
  */
 public class ExcelHandler {
 
+    public static void aa(InputStream is) throws Exception {
+        Workbook workbook = WorkbookFactory.create(is);
+        readSheetWithAnnotationBySheetIndex(workbook, ExcelHeader.class, 0, 0, 0);
+    }
+
     /**
-     * 根据注解导出一张工作表的工作簿
+     * 读取工作表中的数据，基于注解
+     *
+     * @param workbook   工作簿
+     * @param clazz      处理对象
+     * @param startLine  开始行（标题行）数
+     * @param limitLine  读取行数量
+     * @param sheetIndex 工作表索引
+     * @param <T>        数据类型
+     * @return 数据集合
+     */
+    private static <T> List<T> readSheetWithAnnotationBySheetIndex(Workbook workbook, Class<T> clazz,
+                                                                   int startLine, int limitLine, int sheetIndex) throws Exception {
+        // 工作表
+        Sheet sheet = workbook.getSheetAt(sheetIndex);
+        // 结束行
+        int endLine = sheet.getLastRowNum() > (startLine + limitLine) ? (startLine + limitLine) : sheet.getLastRowNum();
+        // 标题行
+        Row titleRow = sheet.getRow(startLine);
+        // 标题列对象集合
+        Map<Integer, ExcelHeader> headerMap = ColumnHandler.readHeaderMapByTitle(titleRow, clazz);
+        if (headerMap == null || headerMap.size() == 0) {
+            return null;
+        }
+        List<T> data = new ArrayList<>();
+        for (int i = startLine + 1; i <= endLine; i++) {
+            Row row = sheet.getRow(i);
+            if (row == null) {
+                continue;
+            }
+            T obj = clazz.newInstance();
+            for (Map.Entry<Integer, ExcelHeader> entry : headerMap.entrySet()) {
+                // 单元格数据字符串
+                String value = ColumnHandler.getCellValue(row.getCell(entry.getKey()));
+                ExcelHeader header = entry.getValue();
+            }
+            for (Cell cell : row) {
+                ExcelHeader header = headerMap.get(cell.getColumnIndex());
+                if (header == null) {
+                    continue;
+                }
+                String valString = ColumnHandler.getCellValue(cell);
+                // TODO 转换器
+
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * 导出一张工作表的工作簿，基于注解
      *
      * @param data          数据
      * @param clazz         处理对象
@@ -30,7 +86,7 @@ public class ExcelHandler {
      */
     public static Workbook exportWorkbookWithAnnotation(List<?> data, Class clazz, String sheetName, String groupName, boolean isWriteHeader, WorkbookType workbookType) throws Exception {
         Workbook workbook = createWorkbook(workbookType);
-        sheetWithAnnotation(workbook, data, clazz, sheetName, groupName, isWriteHeader);
+        createSheetWithAnnotation(workbook, data, clazz, sheetName, groupName, isWriteHeader);
         return workbook;
     }
 
@@ -59,7 +115,7 @@ public class ExcelHandler {
     }
 
     /**
-     * 根据注解创建一张工作表
+     * 创建一张工作表，基于注解
      *
      * @param workbook      工作簿
      * @param data          数据
@@ -69,7 +125,7 @@ public class ExcelHandler {
      * @param isWriteHeader 是否写入表头
      * @throws Exception 异常
      */
-    private static void sheetWithAnnotation(Workbook workbook, List<?> data, Class clazz, String sheetName, String groupName, boolean isWriteHeader) throws Exception {
+    private static void createSheetWithAnnotation(Workbook workbook, List<?> data, Class clazz, String sheetName, String groupName, boolean isWriteHeader) throws Exception {
         // 创建一张工作表
         Sheet sheet;
         if (sheetName != null && !"".equals(sheetName)) {

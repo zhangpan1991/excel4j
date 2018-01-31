@@ -1,5 +1,6 @@
 package com.zhang.excel4j;
 
+import com.zhang.excel4j.common.WorkbookType;
 import com.zhang.excel4j.handler.ColumnHandler;
 import com.zhang.excel4j.handler.ExcelHandler;
 
@@ -32,9 +33,19 @@ public class ExportUtil {
         return exportUtil;
     }
 
+    /**
+     * 导出数据到本地地址
+     *
+     * @param data     数据
+     * @param clazz    处理对象
+     * @param filePath 文件路径（包含后缀）
+     * @throws Exception 异常
+     */
     public void exportObjects2Excel(List<?> data, Class clazz, String filePath) throws Exception {
         File file = new File(filePath);
         FileOutputStream fos = new FileOutputStream(file);
-        ExcelHandler.exportWorkbookWithAnnotation(data, clazz, null, null, true, ColumnHandler.getWorkbookTypeByFilePath(filePath)).write(fos);
+        // 工作簿类型
+        WorkbookType workbookType = ColumnHandler.getWorkbookTypeByFilePath(filePath);
+        ExcelHandler.exportWorkbookWithAnnotation(data, clazz, null, null, true, workbookType).write(fos);
     }
 }

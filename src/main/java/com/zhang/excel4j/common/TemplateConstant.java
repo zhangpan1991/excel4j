@@ -6,5 +6,5 @@ package com.zhang.excel4j.common;
  * author : zhangpan
  * date : 2018/1/29 16:37
  */
-public class TemplateConstant {
+public interface TemplateConstant {
 }

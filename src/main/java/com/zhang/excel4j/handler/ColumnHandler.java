@@ -8,9 +8,12 @@ import com.zhang.excel4j.common.WorkbookType;
 import com.zhang.excel4j.converter.Converter;
 import com.zhang.excel4j.converter.DefaultConverter;
 import com.zhang.excel4j.model.ExcelHeader;
+import com.zhang.excel4j.util.DateUtil;
+import com.zhang.excel4j.util.RegularUtil;
 import org.apache.commons.codec.binary.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
+import org.apache.poi.ss.usermodel.Row;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -18,11 +21,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.regex.Matcher;
+import java.text.ParseException;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -90,6 +90,31 @@ public class ColumnHandler {
         // 排序
         Collections.sort(headers);
         return headers;
+    }
+
+    /**
+     * 通过表头获取标题列集合
+     *
+     * @param titleRow 标题行
+     * @param clazz    类型
+     * @return 标题列Map集合
+     * @throws InstantiationException 异常
+     * @throws IllegalAccessException 异常
+     */
+    public static Map<Integer, ExcelHeader> readHeaderMapByTitle(Row titleRow, Class<?> clazz)
+            throws InstantiationException, IllegalAccessException {
+        List<ExcelHeader> headers = getExcelHeaderList(clazz);
+        Map<Integer, ExcelHeader> map = new HashMap<>(headers.size());
+        for (Cell cell : titleRow) {
+            String title = cell.getStringCellValue();
+            for (ExcelHeader header : headers) {
+                if (header.getTitle().equals(title.trim())) {
+                    map.put(cell.getColumnIndex(), header);
+                    break;
+                }
+            }
+        }
+        return map;
     }
 
     /**
@@ -165,7 +190,7 @@ public class ColumnHandler {
             case NUMERIC:
                 o = String.valueOf(c.getNumericCellValue());
                 o = matchDoneBigDecimal(o);
-                o = converNumByReg(o);
+                o = RegularUtil.converNumByReg(o);
                 break;
             case STRING:
                 o = c.getStringCellValue();
@@ -205,19 +230,37 @@ public class ColumnHandler {
         return cellValue.formatAsString();
     }
 
-    /**
-     * 通过正则表达式获取有效的数字字符串
-     *
-     * @param number 字符串
-     * @return 数字字符串
-     */
-    public static String converNumByReg(String number) {
-        Pattern compile = Pattern.compile("^(\\d+)(\\.0*)?$");
-        Matcher matcher = compile.matcher(number);
-        while (matcher.find()) {
-            number = matcher.group(1);
+    public static Object str2TargetClass(String strField, Class<?> clazz) throws ParseException {
+        if (null == strField || "".equals(strField))
+            return null;
+        if ((Long.class == clazz) || (long.class == clazz)) {
+            strField = matchDoneBigDecimal(strField);
+            strField = RegularUtil.converNumByReg(strField);
+            return Long.parseLong(strField);
         }
-        return number;
+        if ((Integer.class == clazz) || (int.class == clazz)) {
+            strField = matchDoneBigDecimal(strField);
+            strField = RegularUtil.converNumByReg(strField);
+            return Integer.parseInt(strField);
+        }
+        if ((Float.class == clazz) || (float.class == clazz)) {
+            strField = matchDoneBigDecimal(strField);
+            return Float.parseFloat(strField);
+        }
+        if ((Double.class == clazz) || (double.class == clazz)) {
+            strField = matchDoneBigDecimal(strField);
+            return Double.parseDouble(strField);
+        }
+        if ((Character.class == clazz) || (char.class == clazz)) {
+            return strField.toCharArray()[0];
+        }
+        if ((Boolean.class == clazz) || (boolean.class == clazz)) {
+            return Boolean.parseBoolean(strField);
+        }
+        if (Date.class == clazz) {
+            return DateUtil.str2Date(strField);
+        }
+        return strField;
     }
 
     /**
@@ -229,6 +272,7 @@ public class ColumnHandler {
     public static WorkbookType getWorkbookTypeByFilePath(String filePath) {
         // 获取文件后缀
         String suffix = filePath.substring(filePath.lastIndexOf(".") + 1);
+        // TODO 判断后缀是否有效
         return WorkbookType.getWorkbookType(suffix);
     }
 }

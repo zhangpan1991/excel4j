@@ -20,6 +20,16 @@ import java.util.List;
 public class UtilTest {
 
     @Test
+    public void test() {
+        String a = "1212121.00";
+        String b = ColumnHandler.converNumByReg(a);
+        Integer c = Integer.parseInt(b);
+        System.out.println(c);
+
+
+    }
+
+    @Test
     public void testGetterOrSetter() {
         try {
             User user = new User();
