@@ -1,9 +1,14 @@
 package com.zhang.excel4j.handler;
 
 import com.zhang.excel4j.common.WorkbookType;
+import com.zhang.excel4j.converter.Converter;
+import com.zhang.excel4j.converter.DefaultConverter;
 import com.zhang.excel4j.model.ExcelHeader;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.InputStream;
@@ -20,6 +25,37 @@ public class ExcelHandler {
     public static void aa(InputStream is) throws Exception {
         Workbook workbook = WorkbookFactory.create(is);
         readSheetWithAnnotationBySheetIndex(workbook, ExcelHeader.class, 0, 0, 0);
+    }
+
+    public <T> List<T> readWorkbookWithAnnotation(InputStream is, Class<T> clazz, int startLine, int limitLine, int... sheetIndexes) throws Exception {
+        Workbook workbook = WorkbookFactory.create(is);
+        List<T> dataList = new ArrayList<>();
+
+        for (int i = 0; i < sheetIndexes.length; i++) {
+            List<T> list = readSheetWithAnnotationBySheetIndex(workbook, clazz, startLine, limitLine, sheetIndexes[i]);
+            if (list != null) {
+                dataList.addAll(list);
+            }
+        }
+        return dataList;
+    }
+
+    /**
+     * 导出一张工作表的工作簿，基于注解
+     *
+     * @param data          数据
+     * @param clazz         处理对象
+     * @param sheetName     工作表名
+     * @param groupName     分组名
+     * @param isWriteHeader 是否写入表头
+     * @param workbookType  工作簿类型
+     * @return 工作簿
+     * @throws Exception 异常
+     */
+    public static Workbook exportWorkbookWithAnnotation(List<?> data, Class clazz, String sheetName, String groupName, boolean isWriteHeader, WorkbookType workbookType) throws Exception {
+        Workbook workbook = createWorkbook(workbookType);
+        createSheetWithAnnotation(workbook, data, clazz, sheetName, groupName, isWriteHeader);
+        return workbook;
     }
 
     /**
@@ -55,39 +91,23 @@ public class ExcelHandler {
             T obj = clazz.newInstance();
             for (Map.Entry<Integer, ExcelHeader> entry : headerMap.entrySet()) {
                 // 单元格数据字符串
-                String value = ColumnHandler.getCellValue(row.getCell(entry.getKey()));
+                String valString = ColumnHandler.getCellValue(row.getCell(entry.getKey()));
                 ExcelHeader header = entry.getValue();
-            }
-            for (Cell cell : row) {
-                ExcelHeader header = headerMap.get(cell.getColumnIndex());
-                if (header == null) {
-                    continue;
+                Object value;
+                // 数据转换
+                Converter converter = header.getConverter();
+                if (converter != null && converter.getClass() != DefaultConverter.class) {
+                    value = converter.execRead(valString);
+                } else {
+                    // 默认数据转换
+                    value = ColumnHandler.str2TargetClass(valString, header.getFiledClazz());
                 }
-                String valString = ColumnHandler.getCellValue(cell);
-                // TODO 转换器
-
+                // 对象赋值
+                ColumnHandler.copyProperty(obj, header.getFiled(), value);
             }
+            data.add(obj);
         }
-
-        return null;
-    }
-
-    /**
-     * 导出一张工作表的工作簿，基于注解
-     *
-     * @param data          数据
-     * @param clazz         处理对象
-     * @param sheetName     工作表名
-     * @param groupName     分组名
-     * @param isWriteHeader 是否写入表头
-     * @param workbookType  工作簿类型
-     * @return 工作簿
-     * @throws Exception 异常
-     */
-    public static Workbook exportWorkbookWithAnnotation(List<?> data, Class clazz, String sheetName, String groupName, boolean isWriteHeader, WorkbookType workbookType) throws Exception {
-        Workbook workbook = createWorkbook(workbookType);
-        createSheetWithAnnotation(workbook, data, clazz, sheetName, groupName, isWriteHeader);
-        return workbook;
+        return data;
     }
 
     /**

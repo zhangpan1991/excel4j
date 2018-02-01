@@ -20,10 +20,8 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * author : zhangpan
@@ -64,7 +62,7 @@ public class ColumnHandler {
             // 是否使用ExportField注解
             if (field.isAnnotationPresent(Column.class)) {
                 Column exportField = field.getAnnotation(Column.class);
-                header = new ExcelHeader(exportField.value(), exportField.order(), exportField.dataType(), exportField.converter().newInstance(), field.getName(), field.getType());
+                header = new ExcelHeader(exportField.value(), exportField.order(), exportField.converter().newInstance(), field.getName(), field.getType());
                 if (StringUtils.equals(GroupBy.ALL, group) || GroupType.NON.equals(exportField.groupType())) {
                     headers.add(header);
                     continue;
@@ -162,8 +160,8 @@ public class ColumnHandler {
         Method method = getterOrSetter(object.getClass(), fieldName, FieldAccessType.GETTER);
         // 属性值
         Object fieldValue = method.invoke(object);
+        // 数据转换
         if (converter != null && converter.getClass() != DefaultConverter.class) {
-            // TODO 数据类型和转换器
             fieldValue = converter.execWrite(fieldValue);
         }
         return fieldValue == null ? "" : fieldValue.toString();
@@ -189,8 +187,8 @@ public class ColumnHandler {
                 break;
             case NUMERIC:
                 o = String.valueOf(c.getNumericCellValue());
-                o = matchDoneBigDecimal(o);
-                o = RegularUtil.converNumByReg(o);
+                o = RegularUtil.matchDoneBigDecimal(o);
+                o = RegularUtil.convertNumByReg(o);
                 break;
             case STRING:
                 o = c.getStringCellValue();
@@ -200,22 +198,6 @@ public class ColumnHandler {
                 break;
         }
         return o;
-    }
-
-    /**
-     * 科学计数法数据转换
-     *
-     * @param bigDecimal 科学计数法
-     * @return 数据字符串
-     */
-    private static String matchDoneBigDecimal(String bigDecimal) {
-        // 对科学计数法进行处理
-        boolean flg = Pattern.matches("^-?\\d+(\\.\\d+)?(E-?\\d+)?$", bigDecimal);
-        if (flg) {
-            BigDecimal bd = new BigDecimal(bigDecimal);
-            bigDecimal = bd.toPlainString();
-        }
-        return bigDecimal;
     }
 
     /**
@@ -242,21 +224,21 @@ public class ColumnHandler {
         if (null == strField || "".equals(strField))
             return null;
         if ((Long.class == clazz) || (long.class == clazz)) {
-            strField = matchDoneBigDecimal(strField);
-            strField = RegularUtil.converNumByReg(strField);
+            strField = RegularUtil.matchDoneBigDecimal(strField);
+            strField = RegularUtil.convertNumByReg(strField);
             return Long.parseLong(strField);
         }
         if ((Integer.class == clazz) || (int.class == clazz)) {
-            strField = matchDoneBigDecimal(strField);
-            strField = RegularUtil.converNumByReg(strField);
+            strField = RegularUtil.matchDoneBigDecimal(strField);
+            strField = RegularUtil.convertNumByReg(strField);
             return Integer.parseInt(strField);
         }
         if ((Float.class == clazz) || (float.class == clazz)) {
-            strField = matchDoneBigDecimal(strField);
+            strField = RegularUtil.matchDoneBigDecimal(strField);
             return Float.parseFloat(strField);
         }
         if ((Double.class == clazz) || (double.class == clazz)) {
-            strField = matchDoneBigDecimal(strField);
+            strField = RegularUtil.matchDoneBigDecimal(strField);
             return Double.parseDouble(strField);
         }
         if ((Character.class == clazz) || (char.class == clazz)) {
@@ -272,20 +254,19 @@ public class ColumnHandler {
     }
 
     /**
-     * 根据对象的属性名获取属性
+     * 根据对象的属性名获取属性，包含安全范围和所有父类
      *
      * @param clazz     class对象
      * @param fieldName 属性名
      * @return class对象的属性
      */
-    private static Field matchClassField(Class clazz, String fieldName) {
-        List<Field> fields = new ArrayList<>();
+    private static Field matchClassField(Class<?> clazz, String fieldName) {
+        Field field;
         for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
-            fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
-        }
-        for (Field field : fields) {
-            if (fieldName.equals(field.getName())) {
-                return field;
+            try {
+                return clazz.getDeclaredField(fieldName);
+            } catch (NoSuchFieldException e) {
+                // 没找到属性就继续
             }
         }
         return null;
@@ -294,21 +275,21 @@ public class ColumnHandler {
     /**
      * 根据属性名与属性类型获取字段内容
      *
-     * @param bean  对象
-     * @param name  字段名
-     * @param value 字段类型
+     * @param bean      对象
+     * @param filedName 字段名
+     * @param value     字段内容
      * @throws InvocationTargetException 异常
      * @throws IllegalAccessException    异常
      * @throws IntrospectionException    异常
      */
-    public static void copyProperty(Object bean, String name, Object value)
+    public static void copyProperty(Object bean, String filedName, Object value)
             throws InvocationTargetException, IllegalAccessException, IntrospectionException, ParseException {
-        if (null == name || null == value)
+        if (null == filedName || null == value)
             return;
-        Field field = matchClassField(bean.getClass(), name);
+        Field field = matchClassField(bean.getClass(), filedName);
         if (null == field)
             return;
-        Method method = getterOrSetter(bean.getClass(), name, FieldAccessType.SETTER);
+        Method method = getterOrSetter(bean.getClass(), filedName, FieldAccessType.SETTER);
 
         if (value.getClass() == field.getType()) {
             method.invoke(bean, value);

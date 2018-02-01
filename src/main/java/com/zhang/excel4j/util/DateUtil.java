@@ -5,6 +5,7 @@ import com.zhang.excel4j.common.DateFormatPattern;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Pattern;
 
 /**
  * 日期时间相关工具
@@ -102,28 +103,28 @@ public class DateUtil {
     public static Date str2Date(String strDate) throws ParseException {
         strDate = strDate.trim();
         SimpleDateFormat sdf = null;
-        if (RegularUtil.isMatched(strDate, DATE_REG)) {
+        if (Pattern.matches(strDate, DATE_REG)) {
             sdf = new SimpleDateFormat(DateFormatPattern.DATE_FORMAT_DAY);
         }
-        if (RegularUtil.isMatched(strDate, DATE_REG_2)) {
+        if (Pattern.matches(strDate, DATE_REG_2)) {
             sdf = new SimpleDateFormat(DateFormatPattern.DATE_FORMAT_DAY_2);
         }
-        if (RegularUtil.isMatched(strDate, DATE_REG_SIMPLE_2)) {
+        if (Pattern.matches(strDate, DATE_REG_SIMPLE_2)) {
             sdf = new SimpleDateFormat(DateFormatPattern.DATE_FORMAT_DAY_SIMPLE);
         }
-        if (RegularUtil.isMatched(strDate, TIME_SEC_REG)) {
+        if (Pattern.matches(strDate, TIME_SEC_REG)) {
             sdf = new SimpleDateFormat(DateFormatPattern.TIME_FORMAT_SEC);
         }
-        if (RegularUtil.isMatched(strDate, DATE_TIME_REG)) {
+        if (Pattern.matches(strDate, DATE_TIME_REG)) {
             sdf = new SimpleDateFormat(DateFormatPattern.DATE_FORMAT_SEC);
         }
-        if (RegularUtil.isMatched(strDate, DATE_TIME_MSEC_REG)) {
+        if (Pattern.matches(strDate, DATE_TIME_MSEC_REG)) {
             sdf = new SimpleDateFormat(DateFormatPattern.DATE_FORMAT_MSEC);
         }
-        if (RegularUtil.isMatched(strDate, DATE_TIME_MSEC_T_REG)) {
+        if (Pattern.matches(strDate, DATE_TIME_MSEC_T_REG)) {
             sdf = new SimpleDateFormat(DateFormatPattern.DATE_FORMAT_MSEC_T);
         }
-        if (RegularUtil.isMatched(strDate, DATE_TIME_MSEC_T_Z_REG)) {
+        if (Pattern.matches(strDate, DATE_TIME_MSEC_T_Z_REG)) {
             sdf = new SimpleDateFormat(DateFormatPattern.DATE_FORMAT_MSEC_T_Z);
         }
         if (null != sdf) {

@@ -1,6 +1,5 @@
 package com.zhang.excel4j.model;
 
-import com.zhang.excel4j.common.DataType;
 import com.zhang.excel4j.converter.Converter;
 
 /**
@@ -22,11 +21,6 @@ public class ExcelHeader implements Comparable<ExcelHeader> {
     private Double order;
 
     /**
-     * 数据类型
-     */
-    private DataType dataType;
-
-    /**
      * 数据转换器
      */
     private Converter converter;
@@ -44,10 +38,9 @@ public class ExcelHeader implements Comparable<ExcelHeader> {
     public ExcelHeader() {
     }
 
-    public ExcelHeader(String title, Double order, DataType dataType, Converter converter, String filed, Class<?> filedClazz) {
+    public ExcelHeader(String title, Double order, Converter converter, String filed, Class<?> filedClazz) {
         this.title = title;
         this.order = order;
-        this.dataType = dataType;
         this.converter = converter;
         this.filed = filed;
         this.filedClazz = filedClazz;
@@ -72,14 +65,6 @@ public class ExcelHeader implements Comparable<ExcelHeader> {
 
     public void setOrder(Double order) {
         this.order = order;
-    }
-
-    public DataType getDataType() {
-        return dataType;
-    }
-
-    public void setDataType(DataType dataType) {
-        this.dataType = dataType;
     }
 
     public Converter getConverter() {

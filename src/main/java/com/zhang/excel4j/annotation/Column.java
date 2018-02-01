@@ -1,6 +1,5 @@
 package com.zhang.excel4j.annotation;
 
-import com.zhang.excel4j.common.DataType;
 import com.zhang.excel4j.common.GroupType;
 import com.zhang.excel4j.converter.Converter;
 import com.zhang.excel4j.converter.DefaultConverter;
@@ -39,12 +38,6 @@ public @interface Column {
      * @return 全局排序值
      */
     double order() default GroupBy.MAX;
-
-    /**
-     * 转换数据类型
-     * @return 数据类型
-     */
-    DataType dataType() default DataType.TEXT;
 
     /**
      * 数据转换器

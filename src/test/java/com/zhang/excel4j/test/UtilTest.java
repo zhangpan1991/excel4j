@@ -12,6 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * author : zhangpan
@@ -21,12 +22,11 @@ public class UtilTest {
 
     @Test
     public void test() {
-        String a = "1212121.00";
-        String b = ColumnHandler.converNumByReg(a);
-        Integer c = Integer.parseInt(b);
-        System.out.println(c);
-
-
+        String bigDecimal = "2.0E02";
+        boolean flg = Pattern.matches("^-?[1-9](\\.\\d+)?(E[+-]?\\d+)$", bigDecimal);
+        boolean flg2 = Pattern.compile("^-?\\d+(\\.\\d+)?(E-?\\d+)?$").matcher(bigDecimal).find();
+        System.out.println(flg);
+        System.out.println(flg2);
     }
 
     @Test
