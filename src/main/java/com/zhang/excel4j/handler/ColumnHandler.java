@@ -59,7 +59,7 @@ public class ColumnHandler {
         }
         for (Field field : fields) {
             ExcelHeader header;
-            // 是否使用ExportField注解
+            // 是否使用Column注解
             if (field.isAnnotationPresent(Column.class)) {
                 Column exportField = field.getAnnotation(Column.class);
                 header = new ExcelHeader(exportField.value(), exportField.order(), exportField.converter().newInstance(), field.getName(), field.getType());

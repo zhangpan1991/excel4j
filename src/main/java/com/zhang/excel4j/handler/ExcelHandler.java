@@ -22,17 +22,22 @@ import java.util.Map;
  */
 public class ExcelHandler {
 
-    public static void aa(InputStream is) throws Exception {
-        Workbook workbook = WorkbookFactory.create(is);
-        readSheetWithAnnotationBySheetIndex(workbook, ExcelHeader.class, 0, 0, 0);
-    }
-
-    public <T> List<T> readWorkbookWithAnnotation(InputStream is, Class<T> clazz, int startLine, int limitLine, int... sheetIndexes) throws Exception {
-        Workbook workbook = WorkbookFactory.create(is);
+    /**
+     * 读取多张Sheet到绑定的对象集合，基于注解
+     *
+     * @param workbook     工作簿
+     * @param clazz        处理对象
+     * @param startLine    开始行（标题行）数
+     * @param limitLine    读取行数量
+     * @param sheetIndexes 工作表索引集合
+     * @param <T>          绑定的数据类型
+     * @return 已绑定数据对象集合
+     * @throws Exception 异常
+     */
+    public <T> List<T> readSheetsWithAnnotation(Workbook workbook, Class<T> clazz, int startLine, int limitLine, int... sheetIndexes) throws Exception {
         List<T> dataList = new ArrayList<>();
-
-        for (int i = 0; i < sheetIndexes.length; i++) {
-            List<T> list = readSheetWithAnnotationBySheetIndex(workbook, clazz, startLine, limitLine, sheetIndexes[i]);
+        for (int sheetIndex : sheetIndexes ) {
+            List<T> list = readSheetWithAnnotationBySheetIndex(workbook, clazz, startLine, limitLine, sheetIndex);
             if (list != null) {
                 dataList.addAll(list);
             }
@@ -59,7 +64,7 @@ public class ExcelHandler {
     }
 
     /**
-     * 读取工作表中的数据，基于注解
+     * 读取Sheet到绑定的对象集合，基于注解
      *
      * @param workbook   工作簿
      * @param clazz      处理对象
