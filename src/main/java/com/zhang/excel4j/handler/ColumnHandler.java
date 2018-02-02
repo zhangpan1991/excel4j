@@ -167,6 +167,18 @@ public class ColumnHandler {
         return fieldValue == null ? "" : fieldValue.toString();
     }
 
+    public static String getValueByMap(Map map, String fieldName, Converter converter) {
+        if (map == null) {
+            return "";
+        }
+        Object fieldValue = map.get(fieldName);
+        // 数据转换
+        if (converter != null && converter.getClass() != DefaultConverter.class) {
+            fieldValue = converter.execWrite(fieldValue);
+        }
+        return fieldValue == null ? "" : fieldValue.toString();
+    }
+
     /**
      * 获取单元格内容
      *
@@ -307,7 +319,6 @@ public class ColumnHandler {
     public static WorkbookType getWorkbookTypeByFilePath(String filePath) {
         // 获取文件后缀
         String suffix = filePath.substring(filePath.lastIndexOf(".") + 1);
-        // TODO 判断后缀是否有效
         return WorkbookType.getWorkbookType(suffix);
     }
 }

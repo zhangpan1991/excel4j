@@ -46,6 +46,9 @@ public class ExportUtil {
         FileOutputStream fos = new FileOutputStream(file);
         // 工作簿类型
         WorkbookType workbookType = ColumnHandler.getWorkbookTypeByFilePath(filePath);
-        ExcelHandler.exportWorkbookWithAnnotation(data, clazz, null, null, true, workbookType).write(fos);
+        if (workbookType == null) {
+            return;
+        }
+        ExcelHandler.exportWorkbook(data, clazz, null, null, true, workbookType).write(fos);
     }
 }

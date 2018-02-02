@@ -11,7 +11,9 @@ import java.beans.IntrospectionException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -38,17 +40,13 @@ public class UtilTest {
             Method method = ColumnHandler.getterOrSetter(User.class, "username", FieldAccessType.GETTER);
             Object obj = method.invoke(user);
             Assert.assertTrue(user.getUsername().equals(obj));
-        } catch (IntrospectionException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
+        } catch (IntrospectionException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
     }
 
     @Test
-    public void testExport() {
+    public void testExport01() {
         List<User> users = new ArrayList<>();
         int num = 0;
         while (num < 100) {
@@ -60,11 +58,36 @@ public class UtilTest {
 
             num++;
         }
-        String path = "D:/Download/用户.xls";
+        String path = "D:/Download/用户01.xls";
         try {
             ExportUtil.getInstance().exportObjects2Excel(users, User.class, path);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void testExport02() {
+        List<Map<String, Object>> users = new ArrayList<>();
+        int num = 0;
+        while (num < 100) {
+            Map<String, Object> user = new HashMap<>();
+            user.put("id", (num + 1) + "");
+            user.put("username", "张三");
+            user.put("password", "sdfasdfasd");
+            users.add(user);
+            num++;
+        }
+        String path = "D:/Download/用户02.xls";
+        try {
+            ExportUtil.getInstance().exportObjects2Excel(users, User.class, path);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testExport03() {
+
     }
 }
