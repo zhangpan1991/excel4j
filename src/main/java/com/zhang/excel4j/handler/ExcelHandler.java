@@ -193,8 +193,10 @@ public class ExcelHandler {
         if (sheet == null) {
             return null;
         }
+        limitLine = limitLine <= 0 ? Integer.MAX_VALUE : limitLine;
+        int totalLine = ((long) startLine + limitLine) > Integer.MAX_VALUE ? Integer.MAX_VALUE : (startLine + limitLine);
         // 结束行
-        int endLine = sheet.getLastRowNum() > (startLine + limitLine - 1) ? (startLine + limitLine - 1) : sheet.getLastRowNum();
+        int endLine = sheet.getLastRowNum() > (totalLine - 1) ? (totalLine - 1) : sheet.getLastRowNum();
         List<T> data = new ArrayList<>();
         for (int i = startLine; i <= endLine; i++) {
             Row row = sheet.getRow(i);
@@ -244,8 +246,10 @@ public class ExcelHandler {
         List<List<String>> data = new ArrayList<>();
         // 工作表
         Sheet sheet = workbook.getSheetAt(sheetIndex);
+        limitLine = limitLine <= 0 ? Integer.MAX_VALUE : limitLine;
+        int totalLine = ((long) startLine + limitLine) > Integer.MAX_VALUE ? Integer.MAX_VALUE : (startLine + limitLine);
         // 结束行
-        int endLine = sheet.getLastRowNum() > (startLine + limitLine - 1) ? (startLine + limitLine - 1) : sheet.getLastRowNum();
+        int endLine = sheet.getLastRowNum() > (totalLine - 1) ? (totalLine - 1) : sheet.getLastRowNum();
         for (int i = startLine; i <= endLine; i++) {
             List<String> rows = new ArrayList<>();
             Row row = sheet.getRow(i);
@@ -281,7 +285,7 @@ public class ExcelHandler {
      * @return 工作簿
      * @throws Exception 异常
      */
-    public static Workbook exportWorkbook(List<?> data, Class clazz, String sheetName, String groupName, boolean isWriteHeader, WorkbookType workbookType) throws Exception {
+    public static Workbook exportWorkbook(List<?> data, Class<?> clazz, String sheetName, String groupName, boolean isWriteHeader, WorkbookType workbookType) throws Exception {
         Workbook workbook = createWorkbook(workbookType);
         createSheet(workbook, data, clazz, sheetName, groupName, isWriteHeader);
         return workbook;
@@ -337,7 +341,7 @@ public class ExcelHandler {
      * @param isWriteHeader 是否写入表头
      * @throws Exception 异常
      */
-    private static void createSheet(Workbook workbook, List<?> data, Class clazz, String sheetName, String groupName, boolean isWriteHeader) throws Exception {
+    private static void createSheet(Workbook workbook, List<?> data, Class<?> clazz, String sheetName, String groupName, boolean isWriteHeader) throws Exception {
         // 创建一张工作表
         Sheet sheet;
         if (sheetName != null && !"".equals(sheetName)) {
