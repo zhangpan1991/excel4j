@@ -1,5 +1,6 @@
 package com.zhang.excel4j.model;
 
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -12,4 +13,7 @@ public class ExcelTemplate {
     private Workbook workbook;
 
     private Sheet sheet;
+
+    private Row row;
+
 }

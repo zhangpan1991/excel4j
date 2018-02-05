@@ -6,6 +6,7 @@ import com.zhang.excel4j.handler.ExcelHandler;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -17,7 +18,7 @@ public class ExportUtil {
     /**
      * 单例模式
      */
-    private static ExportUtil exportUtil;
+    private volatile static ExportUtil exportUtil;
 
     private ExportUtil() {
     }
@@ -41,7 +42,7 @@ public class ExportUtil {
      * @param filePath 文件路径（包含后缀）
      * @throws Exception 异常
      */
-    public void exportObjects2Excel(List<?> data, Class clazz, String filePath) throws Exception {
+    public void exportList2Excel(List<?> data, Class<?> clazz, String filePath) throws Exception {
         File file = new File(filePath);
         FileOutputStream fos = new FileOutputStream(file);
         // 工作簿类型
@@ -49,6 +50,25 @@ public class ExportUtil {
         if (workbookType == null) {
             return;
         }
-        ExcelHandler.exportWorkbook(data, clazz, null, null, true, workbookType).write(fos);
+        exportList2Excel(fos, data, clazz, null, null, true, workbookType);
+    }
+
+    public void exportList2Excel(OutputStream os, List<?> data, Class<?> clazz, String sheetName, String groupName, boolean isWriteHeader, WorkbookType workbookType) throws Exception {
+        ExcelHandler.exportWorkbook(data, clazz, sheetName, groupName, isWriteHeader, workbookType).write(os);
+    }
+
+    public void exportList2Excel(List<?> data, List<String> header, String filePath) throws Exception {
+        File file = new File(filePath);
+        FileOutputStream fos = new FileOutputStream(file);
+        // 工作簿类型
+        WorkbookType workbookType = ColumnHandler.getWorkbookTypeByFilePath(filePath);
+        if (workbookType == null) {
+            return;
+        }
+        exportList2Excel(fos, data, header, null, workbookType);
+    }
+
+    public void exportList2Excel(OutputStream os, List<?> data, List<String> header, String sheetName, WorkbookType workbookType) throws Exception {
+        ExcelHandler.exportWorkbook(data, header, sheetName, workbookType).write(os);
     }
 }

@@ -60,7 +60,7 @@ public class UtilTest {
         }
         String path = "D:/Download/用户01.xls";
         try {
-            ExportUtil.getInstance().exportObjects2Excel(users, User.class, path);
+            ExportUtil.getInstance().exportList2Excel(users, User.class, path);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -80,7 +80,7 @@ public class UtilTest {
         }
         String path = "D:/Download/用户02.xls";
         try {
-            ExportUtil.getInstance().exportObjects2Excel(users, User.class, path);
+            ExportUtil.getInstance().exportList2Excel(users, User.class, path);
         } catch (Exception e) {
             e.printStackTrace();
         }
