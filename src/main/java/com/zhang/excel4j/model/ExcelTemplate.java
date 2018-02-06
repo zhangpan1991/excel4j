@@ -102,8 +102,16 @@ public class ExcelTemplate {
         this.currentCol = this.initCol;
     }
 
-    public void createCell() {
+    /**
+     * 新加单元格
+     *
+     * @param value 数据
+     */
+    public void createCell(Object value) {
         Cell cell = this.row.createCell(currentCol);
+        // 设置单元格样式
+        setCellStyle(cell);
+        cell.setCellValue(value.toString());
     }
 
     /**
@@ -112,7 +120,7 @@ public class ExcelTemplate {
      *
      * @param cell 单元格
      */
-    public void setCellStyle(Cell cell) {
+    private void setCellStyle(Cell cell) {
         if (this.appointLineStyle.containsKey(cell.getRowIndex())) {
             cell.setCellStyle(this.appointLineStyle.get(cell.getRowIndex()));
             return;
