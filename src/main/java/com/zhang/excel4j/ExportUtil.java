@@ -50,11 +50,11 @@ public class ExportUtil {
         if (workbookType == null) {
             return;
         }
-        exportList2Excel(fos, data, clazz, null, null, true, workbookType);
+        exportList2Excel(fos, data, clazz, null, null, workbookType);
     }
 
-    public void exportList2Excel(OutputStream os, List<?> data, Class<?> clazz, String sheetName, String groupName, boolean isWriteHeader, WorkbookType workbookType) throws Exception {
-        ExcelHandler.exportWorkbook(data, clazz, sheetName, groupName, isWriteHeader, workbookType).write(os);
+    public void exportList2Excel(OutputStream os, List<?> data, Class<?> clazz, String sheetName, String groupName, WorkbookType workbookType) throws Exception {
+        ExcelHandler.exportWorkbook(data, clazz, sheetName, groupName, workbookType).write(os);
     }
 
     public void exportList2Excel(List<?> data, List<String> header, String filePath) throws Exception {

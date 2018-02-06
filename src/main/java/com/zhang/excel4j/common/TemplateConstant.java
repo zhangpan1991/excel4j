@@ -9,7 +9,7 @@ package com.zhang.excel4j.common;
 public interface TemplateConstant {
 
     // 数据插入起始坐标点
-    String DATA_INIT_INDEX = "$data_index";
+    String DATA_INDEX = "$data_index";
     // 默认样式
     String DEFAULT_STYLE = "$default_style";
     // 当前标记行样式
@@ -19,5 +19,7 @@ public interface TemplateConstant {
     // 双数行样式
     String DOUBLE_LINE_STYLE = "$double_line_style";
     // 序号列坐标点
-    String SERIAL_NUMBER = "$serial_number";
+    String SERIAL_NUMBER = "$serial_number_col";
+    // 额外数据的标识符
+    String EXTEND_DATA_SIGN = "#";
 }

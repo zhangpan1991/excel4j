@@ -280,14 +280,13 @@ public class ExcelHandler {
      * @param clazz         处理对象
      * @param sheetName     工作表名
      * @param groupName     分组名
-     * @param isWriteHeader 是否写入表头
      * @param workbookType  工作簿类型
      * @return 工作簿
      * @throws Exception 异常
      */
-    public static Workbook exportWorkbook(List<?> data, Class<?> clazz, String sheetName, String groupName, boolean isWriteHeader, WorkbookType workbookType) throws Exception {
+    public static Workbook exportWorkbook(List<?> data, Class<?> clazz, String sheetName, String groupName, WorkbookType workbookType) throws Exception {
         Workbook workbook = createWorkbook(workbookType);
-        createSheet(workbook, data, clazz, sheetName, groupName, isWriteHeader);
+        createSheet(workbook, data, clazz, sheetName, groupName);
         return workbook;
     }
 
@@ -338,10 +337,9 @@ public class ExcelHandler {
      * @param clazz         处理对象
      * @param sheetName     工作表名
      * @param groupName     分组名
-     * @param isWriteHeader 是否写入表头
      * @throws Exception 异常
      */
-    private static void createSheet(Workbook workbook, List<?> data, Class<?> clazz, String sheetName, String groupName, boolean isWriteHeader) throws Exception {
+    private static void createSheet(Workbook workbook, List<?> data, Class<?> clazz, String sheetName, String groupName) throws Exception {
         // 创建一张工作表
         Sheet sheet;
         if (sheetName != null && !"".equals(sheetName)) {
@@ -358,11 +356,9 @@ public class ExcelHandler {
         }
         // 创建一行
         Row row = sheet.createRow(0);
-        if (isWriteHeader) {
-            // 写入标题
-            for (int i = 0; i < headers.size(); i++) {
-                row.createCell(i).setCellValue(headers.get(i).getTitle());
-            }
+        // 写入标题
+        for (int i = 0; i < headers.size(); i++) {
+            row.createCell(i).setCellValue(headers.get(i).getTitle());
         }
         Object obj;
         for (int i = 0; i < data.size(); i++) {
