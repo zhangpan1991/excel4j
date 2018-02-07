@@ -22,4 +22,6 @@ public interface TemplateConstant {
     String SERIAL_NUMBER = "$serial_number_col";
     // 额外数据的标识符
     String EXTEND_DATA_SIGN = "#";
+    // 自定义数据映射表头标识符
+    String DATA_HEADER_SIGN = "&";
 }

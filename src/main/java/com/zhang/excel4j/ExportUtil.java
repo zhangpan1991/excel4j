@@ -3,11 +3,15 @@ package com.zhang.excel4j;
 import com.zhang.excel4j.common.WorkbookType;
 import com.zhang.excel4j.handler.ColumnHandler;
 import com.zhang.excel4j.handler.ExcelHandler;
+import com.zhang.excel4j.handler.TemplateHandler;
+import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 
 /**
  * author : zhangpan
@@ -54,7 +58,11 @@ public class ExportUtil {
     }
 
     public void exportList2Excel(OutputStream os, List<?> data, Class<?> clazz, String sheetName, String groupName, WorkbookType workbookType) throws Exception {
-        ExcelHandler.exportWorkbook(data, clazz, sheetName, groupName, workbookType).write(os);
+        getExportWorkbook(data, clazz, sheetName, groupName, workbookType).write(os);
+    }
+
+    public Workbook getExportWorkbook(List<?> data, Class<?> clazz, String sheetName, String groupName, WorkbookType workbookType) throws Exception {
+        return ExcelHandler.exportWorkbook(data, clazz, sheetName, groupName, workbookType);
     }
 
     public void exportList2Excel(List<?> data, List<String> header, String filePath) throws Exception {
@@ -69,6 +77,19 @@ public class ExportUtil {
     }
 
     public void exportList2Excel(OutputStream os, List<?> data, List<String> header, String sheetName, WorkbookType workbookType) throws Exception {
-        ExcelHandler.exportWorkbook(data, header, sheetName, workbookType).write(os);
+        getExportWorkbook(data, header, sheetName, workbookType).write(os);
+    }
+
+    public Workbook getExportWorkbook(List<?> data, List<String> header, String sheetName, WorkbookType workbookType) {
+        return ExcelHandler.exportWorkbook(data, header, sheetName, workbookType);
+    }
+
+    public Workbook getExportWorkbook(InputStream is, int sheetIndex, List<?> data, Map<String, Object> extendData, Class<?> clazz,
+                                      String groupName, boolean isWriteHeader, String sheetName, boolean isCopySheet) throws Exception {
+        return TemplateHandler.exportExcelTemplate(is, sheetIndex, data, extendData, clazz, groupName, isWriteHeader, sheetName, isCopySheet).getWorkbook();
+    }
+
+    public Workbook getExportWorkbook(InputStream is, int sheetIndex, List<?> data, Map<String, Object> extendData, String sheetName, boolean isCopySheet) throws Exception {
+        return TemplateHandler.exportExcelTemplate(is, sheetIndex, data, extendData, sheetName, isCopySheet).getWorkbook();
     }
 }

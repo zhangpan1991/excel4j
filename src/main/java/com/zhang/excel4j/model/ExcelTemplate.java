@@ -52,6 +52,11 @@ public class ExcelTemplate {
     private int serialNumberCol = -1;
 
     /**
+     * 自定义数据映射关系
+     */
+    private Map<Integer, String> headerMap = new HashMap<>();
+
+    /**
      * 默认样式
      */
     private CellStyle defaultStyle;
@@ -91,6 +96,9 @@ public class ExcelTemplate {
      */
     private float rowHeight;
 
+    /**
+     * 新增行
+     */
     public void createRow() {
         if (this.lastRow > this.currentRow && this.currentRow != this.initRow) {
             this.sheet.shiftRows(this.currentRow, this.lastRow, 1, true, true);
@@ -103,7 +111,7 @@ public class ExcelTemplate {
     }
 
     /**
-     * 新加单元格
+     * 新增单元格
      *
      * @param value 数据
      */
@@ -112,6 +120,33 @@ public class ExcelTemplate {
         // 设置单元格样式
         setCellStyle(cell);
         cell.setCellValue(value.toString());
+        this.currentCol++;
+    }
+
+    /**
+     * 新增单元格
+     *
+     * @param value 数据
+     * @param col   列
+     */
+    public void createCell(Object value, int col) {
+        Cell cell = this.row.createCell(col);
+        // 设置单元格样式
+        setCellStyle(cell);
+        cell.setCellValue(value.toString());
+    }
+
+    public void createSerialNumber(boolean isHeader) {
+        if (this.serialNumberCol < 0) {
+            return;
+        }
+        Cell cell = this.row.createCell(this.serialNumberCol);
+        setCellStyle(cell);
+        if (isHeader) {
+            cell.setCellValue("序号");
+        } else {
+            cell.setCellValue(this.serialNumber++);
+        }
     }
 
     /**
@@ -199,6 +234,14 @@ public class ExcelTemplate {
 
     public void setSerialNumberCol(int serialNumberCol) {
         this.serialNumberCol = serialNumberCol;
+    }
+
+    public Map<Integer, String> getHeaderMap() {
+        return headerMap;
+    }
+
+    public void setHeaderMap(Map<Integer, String> headerMap) {
+        this.headerMap = headerMap;
     }
 
     public CellStyle getDefaultStyle() {
