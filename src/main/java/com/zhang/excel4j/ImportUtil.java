@@ -42,7 +42,8 @@ public class ImportUtil {
      * @throws Exception 异常
      */
     public <T> List<T> readExcel2List(InputStream is, Class<T> clazz) throws Exception {
-        return readExcel2List(is, clazz, 0, Integer.MAX_VALUE);
+        Workbook workbook = WorkbookFactory.create(is);
+        return ExcelHandler.readSheets(workbook, clazz, 0, Integer.MAX_VALUE);
     }
 
     /**
@@ -56,7 +57,8 @@ public class ImportUtil {
      * @throws Exception 异常
      */
     public <T> List<T> readExcel2List(InputStream is, Class<T> clazz, int sheetIndex) throws Exception {
-        return readExcel2List(is, clazz, 0, Integer.MAX_VALUE, sheetIndex);
+        Workbook workbook = WorkbookFactory.create(is);
+        return ExcelHandler.readSheets(workbook, clazz, 0, Integer.MAX_VALUE, sheetIndex);
     }
 
     /**
@@ -70,7 +72,8 @@ public class ImportUtil {
      * @throws Exception 异常
      */
     public <T> List<T> readExcel2List(InputStream is, Class<T> clazz, String sheetName) throws Exception {
-        return readExcel2List(is, clazz, 0, Integer.MAX_VALUE, sheetName);
+        Workbook workbook = WorkbookFactory.create(is);
+        return ExcelHandler.readSheets(workbook, clazz, 0, Integer.MAX_VALUE, sheetName);
     }
 
     /**
@@ -115,7 +118,8 @@ public class ImportUtil {
      * @throws Exception 异常
      */
     public List<List<String>> readExcel2List(InputStream is) throws Exception {
-        return readExcel2List(is, 1, Integer.MAX_VALUE);
+        Workbook workbook = WorkbookFactory.create(is);
+        return ExcelHandler.readSheets(workbook, 1, Integer.MAX_VALUE);
     }
 
     /**
@@ -127,7 +131,8 @@ public class ImportUtil {
      * @throws Exception 异常
      */
     public List<List<String>> readExcel2List(InputStream is, int sheetIndex) throws Exception {
-        return readExcel2List(is, 1, Integer.MAX_VALUE, sheetIndex);
+        Workbook workbook = WorkbookFactory.create(is);
+        return ExcelHandler.readSheets(workbook, 1, Integer.MAX_VALUE, sheetIndex);
     }
 
     /**
@@ -139,7 +144,8 @@ public class ImportUtil {
      * @throws Exception 异常
      */
     public List<List<String>> readExcel2List(InputStream is, String sheetName) throws Exception {
-        return readExcel2List(is, 1, Integer.MAX_VALUE, sheetName);
+        Workbook workbook = WorkbookFactory.create(is);
+        return ExcelHandler.readSheets(workbook, 1, Integer.MAX_VALUE, sheetName);
     }
 
     /**

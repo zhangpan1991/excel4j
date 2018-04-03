@@ -10,11 +10,12 @@
     <packaging>jar</packaging>
 
     <name>excel4j</name>
-    <description>导入导出文件（包含Excel基于poi、csv格式）</description>
+    <url>http://maven.apache.org</url>
+    <description>基于poi导入导出文件（包含Excel、csv格式）</description>
 
     <properties>
-        <poi.version>3.17</poi.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <poi.version>3.17</poi.version>
     </properties>
 
     <dependencies>
