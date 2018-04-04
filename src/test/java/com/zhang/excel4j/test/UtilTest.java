@@ -2,6 +2,7 @@ package com.zhang.excel4j.test;
 
 import com.zhang.excel4j.ExportUtil;
 import com.zhang.excel4j.common.FieldAccessType;
+import com.zhang.excel4j.common.WorkbookType;
 import com.zhang.excel4j.handler.ColumnHandler;
 import com.zhang.excel4j.model.User;
 import org.junit.Assert;
@@ -63,7 +64,7 @@ public class UtilTest {
         }
         String path = "D:/Download/用户01.xls";
         try {
-            ExportUtil.getInstance().exportList2Excel(users, User.class, path);
+            ExportUtil.getInstance().getExportModel(users, User.class, null, null, WorkbookType.getWorkbookType("xls")).export(path);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -83,7 +84,7 @@ public class UtilTest {
         }
         String path = "D:/Download/用户02.xls";
         try {
-            ExportUtil.getInstance().exportList2Excel(users, User.class, path);
+            ExportUtil.getInstance().getExportModel(users, User.class, null, null, WorkbookType.getWorkbookType("xls")).export(path);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -110,7 +111,7 @@ public class UtilTest {
         String path = "D:/Download/用户03.xlsx";
         File templateFile = getPropertiesFile("user_template01.xlsx");
         InputStream ins = new FileInputStream(templateFile);
-        ExportUtil.getInstance().exportList2Excel(path, ins, 0, users, null, User.class, null, false, "用户列表", false);
+        ExportUtil.getInstance().getExcelTemplate(ins, 0, users, null, User.class, null, false, "用户列表", WorkbookType.getWorkbookType("xlsx")).export(path);
     }
 
     @Test
@@ -137,7 +138,7 @@ public class UtilTest {
         Map<String, Object> extendData = new HashMap<>();
         extendData.put("title", "用户列表");
         extendData.put("info", "说明");
-        ExportUtil.getInstance().exportList2Excel(path, ins, 0, users, extendData, User.class, null, false, "用户列表", false);
+        // ExportUtil.getInstance().exportList2Excel(path, ins, 0, users, extendData, User.class, null, false, "用户列表", false);
     }
 
     public File getPropertiesFile(String fileName) throws Exception {

@@ -311,7 +311,7 @@ public class ExcelHandler {
      * @param workbookType 工作簿类型
      * @return 工作簿
      */
-    private static Workbook createWorkbook(WorkbookType workbookType) {
+    public static Workbook createWorkbook(WorkbookType workbookType) {
         Workbook workbook;
         switch (workbookType) {
             case XSSF:

@@ -1,15 +1,14 @@
 package com.zhang.excel4j;
 
+import com.zhang.excel4j.common.ExportType;
 import com.zhang.excel4j.common.WorkbookType;
-import com.zhang.excel4j.handler.ColumnHandler;
 import com.zhang.excel4j.handler.ExcelHandler;
-import com.zhang.excel4j.handler.TemplateHandler;
+import com.zhang.excel4j.handler.ExcelTemplate;
+import com.zhang.excel4j.model.ExportData;
+import com.zhang.excel4j.model.ExportModel;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -39,149 +38,37 @@ public class ExportUtil {
     }
 
     /**
-     * 基于注解，导出Excel数据到本地地址
-     *
-     * @param data     数据
-     * @param clazz    处理对象
-     * @param filePath 导出文件路径（包含后缀）
-     * @throws Exception 异常
-     */
-    public void exportList2Excel(List<?> data, Class<?> clazz, String filePath) throws Exception {
-        File file = new File(filePath);
-        FileOutputStream fos = new FileOutputStream(file);
-        // 工作簿类型
-        WorkbookType workbookType = ColumnHandler.getWorkbookTypeByFilePath(filePath);
-        if (workbookType == null) {
-            return;
-        }
-        ExcelHandler.exportWorkbook(data, clazz, null, null, workbookType).write(fos);
-    }
-
-    /**
-     * 基于注解，导出Excel数据到输出流
-     *
-     * @param os           输出流
-     * @param data         数据
-     * @param clazz        处理对象
-     * @param sheetName    sheet名称
-     * @param groupName    分组名称
-     * @param workbookType 工作簿类型
-     * @throws Exception 异常
-     */
-    public void exportList2Excel(OutputStream os, List<?> data, Class<?> clazz, String sheetName, String groupName, WorkbookType workbookType) throws Exception {
-        ExcelHandler.exportWorkbook(data, clazz, sheetName, groupName, workbookType).write(os);
-    }
-
-    /**
-     * 基于注解，获取导出的Excel工作簿对象
+     * 基于注解，获取导出的Excel导出模型
      *
      * @param data         数据
      * @param clazz        处理对象
      * @param sheetName    sheet名称
      * @param groupName    分组名称
      * @param workbookType 工作簿类型
-     * @return 工作簿对象
+     * @return 导出模型
      * @throws Exception 异常
      */
-    public Workbook getExportWorkbook(List<?> data, Class<?> clazz, String sheetName, String groupName, WorkbookType workbookType) throws Exception {
-        return ExcelHandler.exportWorkbook(data, clazz, sheetName, groupName, workbookType);
+    public ExportModel getExportModel(List<?> data, Class<?> clazz, String sheetName, String groupName, WorkbookType workbookType) throws Exception {
+        Workbook workbook = ExcelHandler.exportWorkbook(data, clazz, sheetName, groupName, workbookType);
+        return new ExportModel(ExportType.WORKBOOK, workbook);
     }
 
     /**
-     * 无模板注解，导出Excel数据到本地地址
-     *
-     * @param data     数据
-     * @param header   表头列表
-     * @param filePath 导出文件路径（包含后缀）
-     * @throws Exception 异常
-     */
-    public void exportList2Excel(List<?> data, List<String> header, String filePath) throws Exception {
-        File file = new File(filePath);
-        FileOutputStream fos = new FileOutputStream(file);
-        // 工作簿类型
-        WorkbookType workbookType = ColumnHandler.getWorkbookTypeByFilePath(filePath);
-        if (workbookType == null) {
-            return;
-        }
-        ExcelHandler.exportWorkbook(data, header, null, workbookType).write(fos);
-    }
-
-    /**
-     * 无模板注解，导出Excel数据到输出流
-     *
-     * @param os           输出流
-     * @param data         数据
-     * @param header       表头列表
-     * @param sheetName    sheet名称
-     * @param workbookType 工作簿类型
-     * @throws Exception 异常
-     */
-    public void exportList2Excel(OutputStream os, List<?> data, List<String> header, String sheetName, WorkbookType workbookType) throws Exception {
-        ExcelHandler.exportWorkbook(data, header, sheetName, workbookType).write(os);
-    }
-
-    /**
-     * 无模板注解，获取导出的Excel工作簿对象
+     * 无模板注解，获取导出的Excel导出模型
      *
      * @param data         数据
      * @param header       表头列表
      * @param sheetName    sheet名称
      * @param workbookType 工作簿类型
-     * @return 工作簿对象
+     * @return 导出模型
      */
-    public Workbook getExportWorkbook(List<?> data, List<String> header, String sheetName, WorkbookType workbookType) {
-        return ExcelHandler.exportWorkbook(data, header, sheetName, workbookType);
+    public ExportModel getExportModel(List<?> data, List<String> header, String sheetName, WorkbookType workbookType) {
+        Workbook workbook = ExcelHandler.exportWorkbook(data, header, sheetName, workbookType);
+        return new ExportModel(ExportType.WORKBOOK, workbook);
     }
 
     /**
-     * 基于模板和注解，导出Excel数据到本地地址
-     *
-     * @param filePath      导出文件路径（包含后缀）
-     * @param is            模板输入流
-     * @param sheetIndex    模板sheet索引
-     * @param data          表数据
-     * @param extendData    额外数据
-     * @param clazz         处理对象
-     * @param groupName     分组名称
-     * @param isWriteHeader 是否插入标题行
-     * @param sheetName     sheet名称
-     * @param isCopySheet   是否复制sheet
-     * @throws Exception 异常
-     */
-    public void exportList2Excel(String filePath, InputStream is, int sheetIndex, List<?> data, Map<String, Object> extendData, Class<?> clazz,
-                                 String groupName, boolean isWriteHeader, String sheetName, boolean isCopySheet) throws Exception {
-        File file = new File(filePath);
-        FileOutputStream fos = new FileOutputStream(file);
-        // 工作簿类型
-        WorkbookType workbookType = ColumnHandler.getWorkbookTypeByFilePath(filePath);
-        if (workbookType == null) {
-            return;
-        }
-        TemplateHandler.exportExcelTemplate(is, sheetIndex, data, extendData, clazz, groupName, isWriteHeader, sheetName, isCopySheet).getWorkbook().write(fos);
-    }
-
-    /**
-     * 基于模板和注解，导出Excel数据到输出流
-     *
-     * @param os            输出流
-     * @param is            模板输入流
-     * @param sheetIndex    模板sheet索引
-     * @param data          表数据
-     * @param extendData    额外数据
-     * @param clazz         处理对象
-     * @param groupName     分组名称
-     * @param isWriteHeader 是否插入标题行
-     * @param sheetName     sheet名称
-     * @param isCopySheet   是否复制sheet
-     * @throws Exception 异常
-     */
-    public void exportList2Excel(OutputStream os, InputStream is, int sheetIndex, List<?> data, Map<String, Object> extendData, Class<?> clazz,
-                                 String groupName, boolean isWriteHeader, String sheetName, boolean isCopySheet) throws Exception {
-        TemplateHandler.exportExcelTemplate(is, sheetIndex, data, extendData, clazz, groupName, isWriteHeader, sheetName, isCopySheet).getWorkbook().write(os);
-    }
-
-    /**
-     * 基于模板和注解，获取导出的Excel工作簿对象
+     * 基于模板和注解，获取导出的Excel模板，装载数据
      *
      * @param is            模板输入流
      * @param sheetIndex    模板sheet索引
@@ -191,67 +78,55 @@ public class ExportUtil {
      * @param groupName     分组名称
      * @param isWriteHeader 是否插入标题行
      * @param sheetName     sheet名称
-     * @param isCopySheet   是否复制sheet
-     * @return 工作簿对象
+     * @param workbookType  工作簿类型
+     * @return Excel模板
      * @throws Exception 异常
      */
-    public Workbook getExportWorkbook(InputStream is, int sheetIndex, List<?> data, Map<String, Object> extendData, Class<?> clazz,
-                                      String groupName, boolean isWriteHeader, String sheetName, boolean isCopySheet) throws Exception {
-        return TemplateHandler.exportExcelTemplate(is, sheetIndex, data, extendData, clazz, groupName, isWriteHeader, sheetName, isCopySheet).getWorkbook();
+    public ExcelTemplate getExcelTemplate(InputStream is, int sheetIndex, List<?> data, Map<String, Object> extendData, Class<?> clazz,
+                                        String groupName, boolean isWriteHeader, String sheetName, WorkbookType workbookType) throws Exception {
+        sheetIndex = sheetIndex < 0 ? 0 : sheetIndex;
+        return ExcelTemplate.loadTemplate(is, workbookType).loadData(sheetIndex, data, extendData, clazz, groupName, isWriteHeader, sheetName);
     }
 
     /**
-     * 基于模板，导出Excel数据到本地地址
+     * 基于模板，获取导出的Excel模板，装载数据
      *
-     * @param filePath    导出文件路径（包含后缀）
-     * @param is          模板输入流
-     * @param sheetIndex  模板sheet索引
-     * @param data        表数据
-     * @param extendData  额外数据
-     * @param sheetName   sheet名称
-     * @param isCopySheet 是否复制sheet
+     * @param is           模板输入流
+     * @param sheetIndex   模板sheet索引
+     * @param data         表数据
+     * @param extendData   额外数据
+     * @param sheetName    sheet名称
+     * @param workbookType 工作簿类型
+     * @return Excel模板
      * @throws Exception 异常
      */
-    public void exportList2Excel(String filePath, InputStream is, int sheetIndex, List<?> data, Map<String, Object> extendData, String sheetName, boolean isCopySheet) throws Exception {
-        File file = new File(filePath);
-        FileOutputStream fos = new FileOutputStream(file);
-        // 工作簿类型
-        WorkbookType workbookType = ColumnHandler.getWorkbookTypeByFilePath(filePath);
-        if (workbookType == null) {
-            return;
-        }
-        TemplateHandler.exportExcelTemplate(is, sheetIndex, data, extendData, sheetName, isCopySheet).getWorkbook().write(fos);
+    public ExcelTemplate getExcelTemplate(InputStream is, int sheetIndex, List<?> data, Map<String, Object> extendData, String sheetName, WorkbookType workbookType) throws Exception {
+        sheetIndex = sheetIndex < 0 ? 0 : sheetIndex;
+        return ExcelTemplate.loadTemplate(is, workbookType).loadData(sheetIndex, data, extendData, sheetName);
     }
 
     /**
-     * 基于模板，导出Excel数据到输出流
+     * 基于模板，获取导出的Excel模板
      *
-     * @param os          输出流
-     * @param is          模板输入流
-     * @param sheetIndex  模板sheet索引
-     * @param data        表数据
-     * @param extendData  额外数据
-     * @param sheetName   sheet名称
-     * @param isCopySheet 是否复制sheet
+     * @param is           模板输入流
+     * @param workbookType 工作簿类型
+     * @return Excel模板
      * @throws Exception 异常
      */
-    public void exportList2Excel(OutputStream os, InputStream is, int sheetIndex, List<?> data, Map<String, Object> extendData, String sheetName, boolean isCopySheet) throws Exception {
-        TemplateHandler.exportExcelTemplate(is, sheetIndex, data, extendData, sheetName, isCopySheet).getWorkbook().write(os);
+    public ExcelTemplate getExcelTemplate(InputStream is, WorkbookType workbookType) throws Exception {
+        return ExcelTemplate.loadTemplate(is, workbookType);
     }
 
     /**
-     * 基于模板，获取导出的Excel工作簿对象
+     * 基于模板，获取导出的Excel模板，装载数据
      *
-     * @param is          模板输入流
-     * @param sheetIndex  模板sheet索引
-     * @param data        表数据
-     * @param extendData  额外数据
-     * @param sheetName   sheet名称
-     * @param isCopySheet 是否复制sheet
-     * @return 工作簿对象
+     * @param is             模板输入流
+     * @param workbookType   工作簿类型
+     * @param exportDataList 导出数据集合
+     * @return Excel模板
      * @throws Exception 异常
      */
-    public Workbook getExportWorkbook(InputStream is, int sheetIndex, List<?> data, Map<String, Object> extendData, String sheetName, boolean isCopySheet) throws Exception {
-        return TemplateHandler.exportExcelTemplate(is, sheetIndex, data, extendData, sheetName, isCopySheet).getWorkbook();
+    public ExcelTemplate getExcelTemplate(InputStream is, WorkbookType workbookType, List<ExportData> exportDataList) throws Exception {
+        return ExcelTemplate.loadTemplate(is, workbookType).loadData(exportDataList);
     }
 }
