@@ -1,15 +1,13 @@
 package com.zhang.excel4j.handler;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 /**
  * author : zhangpan
  * date : 2018/4/4 17:03
  */
-public class SheetHandler {
+public class PoiHandler {
 
     /**
      * 清除单元格
@@ -70,7 +68,7 @@ public class SheetHandler {
                     continue;
                 }
                 newCell = newRow.createCell(j);
-                newCell.getCellStyle().cloneStyleFrom(fromCell.getCellStyle());
+                newCell.setCellStyle(fromCell.getCellStyle());
                 switch (fromCell.getCellTypeEnum()) {
                     case BOOLEAN:
                         newCell.setCellValue(fromCell.getBooleanCellValue());

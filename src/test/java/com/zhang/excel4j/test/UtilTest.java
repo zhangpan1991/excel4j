@@ -111,7 +111,7 @@ public class UtilTest {
         String path = "D:/Download/用户03.xlsx";
         File templateFile = getPropertiesFile("user_template01.xlsx");
         InputStream ins = new FileInputStream(templateFile);
-        ExportUtil.getInstance().getExcelTemplate(ins, 0, users, null, User.class, null, false, "用户列表", WorkbookType.getWorkbookType("xlsx")).export(path);
+        ExportUtil.getInstance().getExcelTemplate(ins, 0, users, null, User.class, null, false, "用户列表").export(path);
     }
 
     @Test

@@ -78,55 +78,51 @@ public class ExportUtil {
      * @param groupName     分组名称
      * @param isWriteHeader 是否插入标题行
      * @param sheetName     sheet名称
-     * @param workbookType  工作簿类型
      * @return Excel模板
      * @throws Exception 异常
      */
     public ExcelTemplate getExcelTemplate(InputStream is, int sheetIndex, List<?> data, Map<String, Object> extendData, Class<?> clazz,
-                                        String groupName, boolean isWriteHeader, String sheetName, WorkbookType workbookType) throws Exception {
+                                          String groupName, boolean isWriteHeader, String sheetName) throws Exception {
         sheetIndex = sheetIndex < 0 ? 0 : sheetIndex;
-        return ExcelTemplate.loadTemplate(is, workbookType).loadData(sheetIndex, data, extendData, clazz, groupName, isWriteHeader, sheetName);
+        return ExcelTemplate.loadTemplate(is).loadData(sheetIndex, data, extendData, clazz, groupName, isWriteHeader, sheetName);
     }
 
     /**
      * 基于模板，获取导出的Excel模板，装载数据
      *
-     * @param is           模板输入流
-     * @param sheetIndex   模板sheet索引
-     * @param data         表数据
-     * @param extendData   额外数据
-     * @param sheetName    sheet名称
-     * @param workbookType 工作簿类型
+     * @param is         模板输入流
+     * @param sheetIndex 模板sheet索引
+     * @param data       表数据
+     * @param extendData 额外数据
+     * @param sheetName  sheet名称
      * @return Excel模板
      * @throws Exception 异常
      */
-    public ExcelTemplate getExcelTemplate(InputStream is, int sheetIndex, List<?> data, Map<String, Object> extendData, String sheetName, WorkbookType workbookType) throws Exception {
+    public ExcelTemplate getExcelTemplate(InputStream is, int sheetIndex, List<?> data, Map<String, Object> extendData, String sheetName) throws Exception {
         sheetIndex = sheetIndex < 0 ? 0 : sheetIndex;
-        return ExcelTemplate.loadTemplate(is, workbookType).loadData(sheetIndex, data, extendData, sheetName);
+        return ExcelTemplate.loadTemplate(is).loadData(sheetIndex, data, extendData, sheetName);
     }
 
     /**
      * 基于模板，获取导出的Excel模板
      *
-     * @param is           模板输入流
-     * @param workbookType 工作簿类型
+     * @param is 模板输入流
      * @return Excel模板
      * @throws Exception 异常
      */
-    public ExcelTemplate getExcelTemplate(InputStream is, WorkbookType workbookType) throws Exception {
-        return ExcelTemplate.loadTemplate(is, workbookType);
+    public ExcelTemplate getExcelTemplate(InputStream is) throws Exception {
+        return ExcelTemplate.loadTemplate(is);
     }
 
     /**
      * 基于模板，获取导出的Excel模板，装载数据
      *
      * @param is             模板输入流
-     * @param workbookType   工作簿类型
      * @param exportDataList 导出数据集合
      * @return Excel模板
      * @throws Exception 异常
      */
-    public ExcelTemplate getExcelTemplate(InputStream is, WorkbookType workbookType, List<ExportData> exportDataList) throws Exception {
-        return ExcelTemplate.loadTemplate(is, workbookType).loadData(exportDataList);
+    public ExcelTemplate getExcelTemplate(InputStream is, List<ExportData> exportDataList) throws Exception {
+        return ExcelTemplate.loadTemplate(is).loadData(exportDataList);
     }
 }

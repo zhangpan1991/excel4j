@@ -1,27 +1,22 @@
 package com.zhang.excel4j.handler;
 
 import com.zhang.excel4j.common.TemplateConstant;
-import com.zhang.excel4j.common.WorkbookType;
 import com.zhang.excel4j.model.ExcelHeader;
 import com.zhang.excel4j.model.ExportData;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 
-import java.io.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.*;
 
 /**
  * author : zhangpan
  * date : 2018/2/2 18:39
  */
 public class ExcelTemplate {
-
-    /**
-     * 模板工作簿
-     */
-    private Workbook template;
 
     /**
      * 当前工作簿
@@ -109,20 +104,36 @@ public class ExcelTemplate {
     private float rowHeight;
 
     /**
+     * 模板sheet索引集合
+     */
+    private Set<Integer> tempSheetIndexes = new HashSet<>();
+
+    /**
+     * 单例模式
+     */
+    private volatile static ExcelTemplate excelTemplate;
+
+    private ExcelTemplate() {
+    }
+
+    /**
      * 加载Excel模板
      *
-     * @param is           模板输入流
-     * @param workbookType 生成工作簿类型
+     * @param is 模板输入流
      * @return Excel模板对象
      * @throws IOException            异常
      * @throws InvalidFormatException 异常
      */
-    public static ExcelTemplate loadTemplate(InputStream is, WorkbookType workbookType) throws IOException, InvalidFormatException {
-        Workbook template = WorkbookFactory.create(is);
-        Workbook workbook = ExcelHandler.createWorkbook(workbookType);
-        ExcelTemplate excelTemplate = new ExcelTemplate();
-        excelTemplate.setTemplate(template);
-        excelTemplate.setWorkbook(workbook);
+    public static ExcelTemplate loadTemplate(InputStream is) throws IOException, InvalidFormatException {
+        if (excelTemplate == null) {
+            synchronized (ExcelTemplate.class) {
+                if (excelTemplate == null) {
+                    excelTemplate = new ExcelTemplate();
+                    Workbook template = WorkbookFactory.create(is);
+                    excelTemplate.setWorkbook(template);
+                }
+            }
+        }
         return excelTemplate;
     }
 
@@ -134,9 +145,10 @@ public class ExcelTemplate {
      */
     private void loadTempSheet(int sheetIndex, Map<String, Object> extendData) {
         // sheet模板
-        Sheet tempSheet = this.template.getSheetAt(sheetIndex);
+        Sheet tempSheet = this.workbook.getSheetAt(sheetIndex);
         this.tempSheet = tempSheet;
         this.lastRow = tempSheet.getLastRowNum();
+        this.tempSheetIndexes.add(sheetIndex);
 
         for (Row row : tempSheet) {
             for (Cell cell : row) {
@@ -159,7 +171,7 @@ public class ExcelTemplate {
                         // 序号列
                         case TemplateConstant.SERIAL_NUMBER:
                             this.serialNumberCol = cell.getColumnIndex();
-                            SheetHandler.clearCell(cell);
+                            PoiHandler.clearCell(cell);
                             break;
                         // 数据列
                         case TemplateConstant.DATA_INDEX:
@@ -168,27 +180,27 @@ public class ExcelTemplate {
                             this.currentCol = cell.getColumnIndex();
                             this.currentRow = cell.getRowIndex();
                             this.rowHeight = row.getHeightInPoints();
-                            SheetHandler.clearCell(cell);
+                            PoiHandler.clearCell(cell);
                             break;
                         // 默认行样式
                         case TemplateConstant.DEFAULT_STYLE:
                             this.defaultStyle = cell.getCellStyle();
-                            SheetHandler.clearCell(cell);
+                            PoiHandler.clearCell(cell);
                             break;
                         // 单行样式
                         case TemplateConstant.APPOINT_LINE_STYLE:
                             this.appointLineStyle.put(cell.getRowIndex(), cell.getCellStyle());
-                            SheetHandler.clearCell(cell);
+                            PoiHandler.clearCell(cell);
                             break;
                         // 单数行样式
                         case TemplateConstant.SINGLE_LINE_STYLE:
                             this.singleLineStyle = cell.getCellStyle();
-                            SheetHandler.clearCell(cell);
+                            PoiHandler.clearCell(cell);
                             break;
                         // 双数行样式
                         case TemplateConstant.DOUBLE_LINE_STYLE:
                             this.doubleLineStyle = cell.getCellStyle();
-                            SheetHandler.clearCell(cell);
+                            PoiHandler.clearCell(cell);
                             break;
                     }
                 }
@@ -287,7 +299,7 @@ public class ExcelTemplate {
             for (Object object : exportData.getData()) {
                 this.createRow();
                 this.createSerialNumber(false);
-                for (Map.Entry<Integer, String> entry : this.getHeaderMap().entrySet()) {
+                for (Map.Entry<Integer, String> entry : this.headerMap.entrySet()) {
                     if (object instanceof Map) {
                         // Map数据
                         this.createCell(ColumnHandler.getValueByMap((Map) object, entry.getValue(), null), entry.getKey());
@@ -303,12 +315,13 @@ public class ExcelTemplate {
 
     /**
      * 新增Sheet
+     *
      * @param sheetName sheet名称
      */
-    public void createSheet(String sheetName) {
+    private void createSheet(String sheetName) {
         // 复制模板
         Sheet sheet = this.workbook.createSheet();
-        SheetHandler.copySheet(tempSheet, sheet, 0, tempSheet.getLastRowNum());
+        PoiHandler.copySheet(tempSheet, sheet, 0, tempSheet.getLastRowNum());
         // 重置序列号
         this.serialNumber = 1;
         // 修改sheet名称
@@ -385,19 +398,19 @@ public class ExcelTemplate {
      */
     private void setCellStyle(Cell cell) {
         if (this.appointLineStyle.containsKey(cell.getRowIndex())) {
-            cell.getCellStyle().cloneStyleFrom(this.appointLineStyle.get(cell.getRowIndex()));
+            cell.setCellStyle(this.appointLineStyle.get(cell.getRowIndex()));
             return;
         }
         if (null != this.singleLineStyle && (cell.getRowIndex() % 2 != 0)) {
-            cell.getCellStyle().cloneStyleFrom(this.singleLineStyle);
+            cell.setCellStyle(this.singleLineStyle);
             return;
         }
         if (null != this.doubleLineStyle && (cell.getRowIndex() % 2 == 0)) {
-            cell.getCellStyle().cloneStyleFrom(this.doubleLineStyle);
+            cell.setCellStyle(this.doubleLineStyle);
             return;
         }
         if (null != this.defaultStyle)
-            cell.getCellStyle().cloneStyleFrom(this.defaultStyle);
+            cell.setCellStyle(this.defaultStyle);
     }
 
     /**
@@ -408,6 +421,7 @@ public class ExcelTemplate {
      */
     public void export(String filePath) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(filePath)) {
+            removeTempSheets();
             this.workbook.write(fos);
         }
     }
@@ -419,22 +433,24 @@ public class ExcelTemplate {
      * @throws IOException IO异常
      */
     public void export(OutputStream os) throws IOException {
+        removeTempSheets();
         this.workbook.write(os);
     }
 
-    public Workbook getTemplate() {
-        return template;
-    }
-
-    public void setTemplate(Workbook template) {
-        this.template = template;
+    /**
+     * 删除模板sheet
+     */
+    private void removeTempSheets() {
+        for (Integer integer : tempSheetIndexes) {
+            workbook.removeSheetAt(integer);
+        }
     }
 
     public Workbook getWorkbook() {
         return workbook;
     }
 
-    public void setWorkbook(Workbook workbook) {
+    private void setWorkbook(Workbook workbook) {
         this.workbook = workbook;
     }
 
@@ -492,14 +508,6 @@ public class ExcelTemplate {
 
     public void setSerialNumberCol(int serialNumberCol) {
         this.serialNumberCol = serialNumberCol;
-    }
-
-    public Map<Integer, String> getHeaderMap() {
-        return headerMap;
-    }
-
-    public void setHeaderMap(Map<Integer, String> headerMap) {
-        this.headerMap = headerMap;
     }
 
     public CellStyle getDefaultStyle() {
